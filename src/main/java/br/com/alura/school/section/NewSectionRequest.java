@@ -1,4 +1,4 @@
-package br.com.alura.school.sections;
+package br.com.alura.school.section;
 
 import br.com.alura.school.course.Course;
 import br.com.alura.school.support.validation.Unique;

@@ -1,4 +1,4 @@
-package br.com.alura.school.sections;
+package br.com.alura.school.section;
 
 import br.com.alura.school.course.Course;
 import br.com.alura.school.user.User;
@@ -6,6 +6,9 @@ import br.com.alura.school.user.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -33,6 +36,14 @@ public class Section {
     @JoinColumn(name = "author_id")
     private User author;
 
+    @ElementCollection
+    @CollectionTable(
+            name="video",
+            joinColumns=@JoinColumn(name="section_id")
+    )
+    @Column(name="url")
+    private List<String> videos;
+
     @Deprecated
     protected Section() {
     }
@@ -42,6 +53,7 @@ public class Section {
         this.title = title;
         this.course = course;
         this.author = author;
+        this.videos = new ArrayList<>();
     }
 
     public Long getId() {
@@ -62,5 +74,13 @@ public class Section {
 
     public User getAuthor() {
         return author;
+    }
+
+    public List<String> getVideos() {
+        return videos;
+    }
+
+    public void addVideo(String video) {
+        this.videos.add(video);
     }
 }

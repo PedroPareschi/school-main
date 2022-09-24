@@ -1,4 +1,4 @@
-package br.com.alura.school.sections;
+package br.com.alura.school.section;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
