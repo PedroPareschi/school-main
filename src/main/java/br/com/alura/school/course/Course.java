@@ -1,52 +1,62 @@
 package br.com.alura.school.course;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import br.com.alura.school.sections.Section;
+
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
-class Course {
+public class Course {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Size(max=10)
+    @Size(max = 10)
     @NotBlank
     @Column(nullable = false, unique = true)
     private String code;
 
-    @Size(max=20)
+    @Size(max = 20)
     @NotBlank
     @Column(nullable = false, unique = true)
     private String name;
 
     private String description;
 
-    @Deprecated
-    protected Course() { }
+    @OneToMany(mappedBy = "course")
+    private List<Section> sections;
 
-    Course(String code, String name, String description) {
+    @Deprecated
+    protected Course() {
+    }
+
+    public Course(String code, String name, String description) {
         this.code = code;
         this.name = name;
         this.description = description;
+        this.sections = new ArrayList<>();
     }
 
-    String getCode() {
+    public String getCode() {
         return code;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 
+    public List<Section> getSections() {
+        return sections;
+    }
 }
