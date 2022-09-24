@@ -1,5 +1,6 @@
 package br.com.alura.school.course;
 
+import br.com.alura.school.enrollments.Enrollment;
 import br.com.alura.school.section.Section;
 
 import javax.persistence.*;
@@ -33,6 +34,9 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<Section> sections;
 
+    @OneToMany(mappedBy = "course")
+    private List<Enrollment> students;
+
     @Deprecated
     protected Course() {
     }
@@ -42,6 +46,11 @@ public class Course {
         this.name = name;
         this.description = description;
         this.sections = new ArrayList<>();
+        this.students = new ArrayList<>();
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getCode() {
@@ -58,5 +67,9 @@ public class Course {
 
     public List<Section> getSections() {
         return sections;
+    }
+
+    public List<Enrollment> getStudents() {
+        return students;
     }
 }
