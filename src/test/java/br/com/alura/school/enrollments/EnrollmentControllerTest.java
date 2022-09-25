@@ -55,13 +55,13 @@ class EnrollmentControllerTest {
 
     @Test
     void should_not_add_no_username() throws Exception {
-        User user = new User("alex", "alex@email.com");
+        User user = new User("pedro", "pedro@email.com");
         userRepository.save(user);
-        courseRepository.save(new Course("java-1", "Java OO", "Java and Object Orientation: Encapsulation, Inheritance and Polymorphism."));
+        courseRepository.save(new Course("java-2", "Java O2", "Java and Object Orientation: Encapsulation, Inheritance and Polymorphism."));
 
         NewEnrollmentRequest enrollmentRequest = new NewEnrollmentRequest("");
 
-        mockMvc.perform(post("/courses/java-1/enroll")
+        mockMvc.perform(post("/courses/java-2/enroll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(enrollmentRequest)))
                 .andExpect(status().isBadRequest());
@@ -69,12 +69,12 @@ class EnrollmentControllerTest {
 
     @Test
     void should_not_acept_unexistent_course() throws Exception {
-        User user = new User("alex", "alex@email.com");
+        User user = new User("suzana", "suzana@email.com");
         userRepository.save(user);
 
-        NewEnrollmentRequest enrollmentRequest = new NewEnrollmentRequest("alex");
+        NewEnrollmentRequest enrollmentRequest = new NewEnrollmentRequest("suzana");
 
-        mockMvc.perform(post("/courses/java-1/enroll")
+        mockMvc.perform(post("/courses/java-22/enroll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(enrollmentRequest)))
                 .andExpect(status().isNotFound());
@@ -82,16 +82,16 @@ class EnrollmentControllerTest {
 
     @Test
     void should_not_accept_duplicate_user() throws Exception {
-        User user = new User("alex", "alex@email.com");
-        userRepository.save(user);
-        Course course = new Course("java-1", "Java OO", "Java and Object Orientation: Encapsulation, Inheritance and Polymorphism.");
-        courseRepository.save(course);
+        User user = new User("daniel", "daniel@email.com");
+        user = userRepository.save(user);
+        Course course = new Course("java-3", "Java O3", "Java and Object Orientation: Encapsulation, Inheritance and Polymorphism.");
+        course = courseRepository.save(course);
 
-        enrollmentRepository.save(new Enrollment(new EnrollmentPK(1L, 1L), user, course, Timestamp.from(Instant.now())));
+        enrollmentRepository.save(new Enrollment(new EnrollmentPK(user.getId(), course.getId()), user, course, Timestamp.from(Instant.now())));
 
-        NewEnrollmentRequest enrollmentRequest = new NewEnrollmentRequest("alex");
+        NewEnrollmentRequest enrollmentRequest = new NewEnrollmentRequest("daniel");
 
-        mockMvc.perform(post("/courses/java-1/enroll")
+        mockMvc.perform(post("/courses/java-3/enroll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(enrollmentRequest)))
                 .andExpect(status().isBadRequest());

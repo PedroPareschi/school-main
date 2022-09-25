@@ -39,7 +39,7 @@ class SectionController {
     @PostMapping("/courses/{code}/sections")
     ResponseEntity<Void> newSection(@PathVariable("code") String code, @RequestBody @Valid NewSectionRequest newSectionRequest) {
         Course course = courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s not found", code)));
-        User author = userRepository.findByUsername(newSectionRequest.getAuthorUsername()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("User with username %s not found", code)));
+        User author = userRepository.findByUsername(newSectionRequest.getAuthorUsername()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("User with username %s not found", newSectionRequest.getAuthorUsername())));
         if (author.getRole() != UserRole.INSTRUCTOR) throw new ResponseStatusException(BAD_REQUEST, format("User %s is not a instructor", author.getUsername()));
         Section section = newSectionRequest.toEntity(course, author);
         for(Section courseSections: course.getSections()){
@@ -55,7 +55,8 @@ class SectionController {
 
     @PostMapping("/courses/{code}/sections/{sectionCode}")
     ResponseEntity<Void> newVideo(@PathVariable("code") String code, @PathVariable("sectionCode") String sectionCode, @RequestBody @Valid NewVideoRequest newVideoRequest) {
-        Section section = sectionRepository.findByCode(sectionCode).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Section with code %s not found", code)));
+        Course course = courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Section with code %s not found", code)));
+        Section section = sectionRepository.findByCourseAndCode(course, sectionCode).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Section with code %s not found", code)));
         String video = newVideoRequest.getVideo();
         if(section.getVideos().contains(video)) throw new ResponseStatusException(BAD_REQUEST, format("Video %s already on class", video));
         section.addVideo(video);
