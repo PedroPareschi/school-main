@@ -2,7 +2,8 @@ package br.com.alura.school.course;
 
 import br.com.alura.school.section.Section;
 import br.com.alura.school.section.SectionComparator;
-import br.com.alura.school.section.SectionRepository;
+import br.com.alura.school.section.SectionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,13 +17,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class CourseService {
 
-    private final CourseRepository courseRepository;
-    private final SectionRepository sectionRepository;
+    @Autowired
+    private  CourseRepository courseRepository;
 
-    public CourseService(CourseRepository courseRepository, SectionRepository sectionRepository) {
-        this.courseRepository = courseRepository;
-        this.sectionRepository = sectionRepository;
-    }
+    @Autowired
+    private  SectionService sectionService;
 
     public List<CourseResponse> getAllCourses(){
         List<Course> courses = courseRepository.findAll();
@@ -42,7 +41,7 @@ public class CourseService {
         Course course = courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s not found", code)));
         if (course.getStudents().isEmpty())
             throw new ResponseStatusException(BAD_REQUEST, format("Course %s has no enrollments", code));
-        List<Section> sections = sectionRepository.findAllByCourse(course).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s has no classes yet", code)));
+        List<Section> sections = sectionService.findAllByCourse(course);
         sections.sort(new SectionComparator());
         return sections.stream().map(CourseSectionByVideosResponse::new).toList();
     }
