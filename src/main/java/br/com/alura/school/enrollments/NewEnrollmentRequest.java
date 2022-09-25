@@ -27,7 +27,7 @@ public class NewEnrollmentRequest {
         return username;
     }
 
-    static Enrollment toEntity(User student, Course course) {
+    public static Enrollment toEntity(User student, Course course) {
         return new Enrollment(new EnrollmentPK(student.getId(), course.getId()), student, course, Timestamp.from(Instant.now()));
     }
 }

@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class SectionControllerTest {
+class EnrollmentControllerTest {
 
     private final ObjectMapper jsonMapper = new ObjectMapper();
 

@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -40,6 +41,12 @@ class SectionController {
         Course course = courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s not found", code)));
         User author = userRepository.findByUsername(newSectionRequest.getAuthorUsername()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("User with username %s not found", code)));
         if (author.getRole() != UserRole.INSTRUCTOR) throw new ResponseStatusException(BAD_REQUEST, format("User %s is not a instructor", author.getUsername()));
+        Section section = newSectionRequest.toEntity(course, author);
+        for(Section courseSections: course.getSections()){
+            if(Objects.equals(courseSections.getCode(), section.getCode())){
+                throw new ResponseStatusException(BAD_REQUEST, format("Section code %s already in use", section.getCode()));
+            }
+        }
         sectionRepository.save(newSectionRequest.toEntity(course, author));
         URI location = URI.create(format("/courses/%s/sections/%s", code, newSectionRequest.getCode()));
         return ResponseEntity.created(location).build();

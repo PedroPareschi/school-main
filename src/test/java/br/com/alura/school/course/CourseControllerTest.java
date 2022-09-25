@@ -1,5 +1,12 @@
 package br.com.alura.school.course;
 
+import br.com.alura.school.enrollments.Enrollment;
+import br.com.alura.school.enrollments.EnrollmentRepository;
+import br.com.alura.school.enrollments.NewEnrollmentRequest;
+import br.com.alura.school.section.Section;
+import br.com.alura.school.section.SectionRepository;
+import br.com.alura.school.user.User;
+import br.com.alura.school.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,12 +34,21 @@ class CourseControllerTest {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired
+    private SectionRepository sectionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
     @Test
     void should_retrieve_course_by_code() throws Exception {
         courseRepository.save(new Course("java-1", "Java OO", "Java and Object Orientation: Encapsulation, Inheritance and Polymorphism."));
 
         mockMvc.perform(get("/courses/java-1")
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code", is("java-1")))
@@ -44,7 +62,7 @@ class CourseControllerTest {
         courseRepository.save(new Course("spring-2", "Spring Boot", "Spring Boot"));
 
         mockMvc.perform(get("/courses")
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", is(2)))
@@ -61,10 +79,40 @@ class CourseControllerTest {
         NewCourseRequest newCourseRequest = new NewCourseRequest("java-2", "Java Collections", "Java Collections: Lists, Sets, Maps and more.");
 
         mockMvc.perform(post("/courses")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(newCourseRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMapper.writeValueAsString(newCourseRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/courses/java-2"));
+    }
+
+    @Test
+    void should_get_sections_by_video_report() throws Exception {
+        User user = new User("alex", "alex@email.com");
+        userRepository.save(user);
+        Course course = new Course("spring-3", "Spring Cloud", "Spring Cloud");
+        courseRepository.save(course);
+        Enrollment enrollment = NewEnrollmentRequest.toEntity(user, course);
+        enrollmentRepository.save(enrollment);
+        Section section1 = new Section("primeira aula", "primeira aula", course, user);
+        Section section2 = new Section("segunda aula", "segunda aula", course, user);
+        section2.addVideo("segundo video");
+        section2.addVideo("terceiro video");
+        sectionRepository.saveAll(List.of(section1, section2));
+
+        mockMvc.perform(get("/courses/spring-3/sectionByVideosReport")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].courseName", is("Spring Cloud")))
+                .andExpect(jsonPath("$[0].sectionTitle", is("segunda aula")))
+                .andExpect(jsonPath("$[0].authorName", is("alex")))
+                .andExpect(jsonPath("$[0].totalVideos", is(2)))
+                .andExpect(jsonPath("$[1].courseName", is("Spring Cloud")))
+                .andExpect(jsonPath("$[1].sectionTitle", is("primeira aula")))
+                .andExpect(jsonPath("$[1].authorName", is("alex")))
+                .andExpect(jsonPath("$[1].totalVideos", is(0)));
+        ;
+
     }
 
 }
