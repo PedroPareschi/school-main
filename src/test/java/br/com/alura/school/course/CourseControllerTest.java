@@ -77,6 +77,14 @@ class CourseControllerTest {
     }
 
     @Test
+    void should_get_not_found_if_code_does_not_exist() throws Exception {
+
+        mockMvc.perform(get("/courses/java-22")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void should_retrieve_all_courses() throws Exception {
         User user = new User("suzana", "suzana@email.com");
         userRepository.save(user);
@@ -118,6 +126,17 @@ class CourseControllerTest {
                         .content(jsonMapper.writeValueAsString(newCourseRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/courses/java-2"));
+    }
+
+    @Test
+    void should_not_add_duplicate_courses() throws Exception {
+        courseRepository.save(new Course("java-5", "Java", "Java Collections"));
+        NewCourseRequest newCourseRequest = new NewCourseRequest("java-5", "Java Collections", "Java Collections: Lists, Sets, Maps and more.");
+
+        mockMvc.perform(post("/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMapper.writeValueAsString(newCourseRequest)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
