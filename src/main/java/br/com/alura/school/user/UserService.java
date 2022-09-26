@@ -1,7 +1,6 @@
 package br.com.alura.school.user;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 
@@ -18,8 +17,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User findByUsername(String username){
-        return userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("User %s not found", username)));
+    public User findByUsername(String username) throws UserException {
+        return userRepository.findByUsername(username).orElseThrow(() -> new UserException(NOT_FOUND, format("User %s not found", username)));
     }
 
     public URI addNewUser(NewUserRequest newUserRequest){

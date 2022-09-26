@@ -1,7 +1,10 @@
 package br.com.alura.school.course;
 
+import br.com.alura.school.section.SectionException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -24,7 +27,12 @@ class CourseController {
 
     @GetMapping("/courses/{code}")
     ResponseEntity<CourseResponse> courseByCode(@PathVariable("code") String code) {
-        Course course = courseService.getCourseByCode(code);
+        Course course;
+        try {
+            course = courseService.getCourseByCode(code);
+        } catch (CourseException e) {
+            throw new ResponseStatusException(e.getHttpStatus(), e.getMessage());
+        }
         return ResponseEntity.ok(new CourseResponse(course));
     }
 
@@ -36,7 +44,12 @@ class CourseController {
 
     @GetMapping("/courses/{code}/sectionByVideosReport")
     ResponseEntity<List<CourseSectionByVideosResponse>> getSectionsByVideosReport(@PathVariable("code") String code) {
-        List<CourseSectionByVideosResponse> responses = courseService.getCourseSectionByVideos(code);
+        List<CourseSectionByVideosResponse> responses = null;
+        try {
+            responses = courseService.getCourseSectionByVideos(code);
+        } catch (CourseException | SectionException e) {
+            throw new ResponseStatusException(e.getHttpStatus(), e.getMessage());
+        }
         return ResponseEntity.ok().body(responses);
     }
 }

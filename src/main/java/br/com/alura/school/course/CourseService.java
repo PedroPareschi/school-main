@@ -2,10 +2,10 @@ package br.com.alura.school.course;
 
 import br.com.alura.school.section.Section;
 import br.com.alura.school.section.SectionComparator;
+import br.com.alura.school.section.SectionException;
 import br.com.alura.school.section.SectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
@@ -28,8 +28,8 @@ public class CourseService {
         return courses.stream().map(CourseResponse::new).toList();
     }
 
-    public Course getCourseByCode(String code){
-        return courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s not found", code)));
+    public Course getCourseByCode(String code) throws CourseException {
+        return courseRepository.findByCode(code).orElseThrow(() -> new CourseException(NOT_FOUND, format("Course with code %s not found", code)));
     }
 
     public URI addCourse(NewCourseRequest newCourseRequest){
@@ -37,10 +37,10 @@ public class CourseService {
         return URI.create(format("/courses/%s", newCourseRequest.getCode()));
     }
 
-    public List<CourseSectionByVideosResponse> getCourseSectionByVideos(String code){
-        Course course = courseRepository.findByCode(code).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, format("Course with code %s not found", code)));
+    public List<CourseSectionByVideosResponse> getCourseSectionByVideos(String code) throws CourseException, SectionException {
+        Course course = courseRepository.findByCode(code).orElseThrow(() -> new CourseException(NOT_FOUND, format("Course with code %s not found", code)));
         if (course.getStudents().isEmpty())
-            throw new ResponseStatusException(BAD_REQUEST, format("Course %s has no enrollments", code));
+            throw new CourseException(BAD_REQUEST, format("Course %s has no enrollments", code));
         List<Section> sections = sectionService.findAllByCourse(course);
         sections.sort(new SectionComparator());
         return sections.stream().map(CourseSectionByVideosResponse::new).toList();

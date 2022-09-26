@@ -1,10 +1,13 @@
 package br.com.alura.school.enrollments;
 
+import br.com.alura.school.course.CourseException;
+import br.com.alura.school.user.UserException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -20,7 +23,12 @@ public class EnrollmentController {
 
     @PostMapping("/courses/{courseCode}/enroll")
     ResponseEntity<Void> newEnrollment(@PathVariable("courseCode") String courseCode, @RequestBody @Valid NewEnrollmentRequest newEnrollmentRequest) {
-        URI location = enrollmentService.addNewEnrollment(courseCode, newEnrollmentRequest);
+        URI location;
+        try {
+            location = enrollmentService.addNewEnrollment(courseCode, newEnrollmentRequest);
+        } catch (EnrollmentException | CourseException | UserException e) {
+            throw new ResponseStatusException(e.getHttpStatus(), e.getMessage());
+        }
         return ResponseEntity.created(location).build();
     }
 }

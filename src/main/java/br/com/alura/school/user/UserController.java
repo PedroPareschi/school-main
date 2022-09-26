@@ -2,6 +2,7 @@ package br.com.alura.school.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -17,7 +18,12 @@ class UserController {
 
     @GetMapping("/users/{username}")
     ResponseEntity<UserResponse> userByUsername(@PathVariable("username") String username) {
-        User user = userService.findByUsername(username);
+        User user;
+        try {
+            user = userService.findByUsername(username);
+        } catch (UserException e) {
+            throw new ResponseStatusException(e.getHttpStatus(), e.getMessage());
+        }
         return ResponseEntity.ok(new UserResponse(user));
     }
 
